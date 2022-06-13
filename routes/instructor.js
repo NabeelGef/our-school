@@ -8,7 +8,7 @@ const router = express.Router();
 // GET /feed/posts
 router.post('/login',instructorController.login);
 router.get('/add-marks-class',isAuth,instructorController.addmark_see_class);
-router.get('/see_sections',instructorController.see_sections);
+router.get('/see_sections',isAuth,instructorController.see_sections);
 //router.get('/add-marks-students/:sectionID',isAuth,instructorController.addmark_see_students);
 
 router.get('/see_students/:sectionID',instructorController.see_students);

@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const Instructor = require('../models/instructor');
 
 module.exports = (req, res, next) => {
-  const authHeader = req.get('authorization');
+  const authHeader = req.get('token');
+  console.log(`Token : ${authHeader}`);
   
   if (!authHeader) {
     const error = new Error('Not authenticated.');
@@ -23,10 +24,6 @@ module.exports = (req, res, next) => {
     error.statusCode = 401;
     throw error;
   }
-  console.log(decodedToken);
-  decodedToken.exp = 0;
-  decodedToken.iat = 0;
-  console.log(decodedToken);
   req.userId = decodedToken.userId;
   Instructor.findByPk(req.userId)
   .then(instructor =>{

@@ -169,7 +169,7 @@ exports.getStudent = async(req,res,next) =>{
   }
 
   exports.see_sections = (req,res,next) =>{
-    id = req.get('userId');
+    id = req.userId;
   console.log(`ID = ${id}`)
     Instructor.findByPk(id)
     .then(instructor =>{
@@ -180,7 +180,7 @@ exports.getStudent = async(req,res,next) =>{
         throw error;
       }
         const instructor_class = instructor.classeNameClass;
-        return Section.findAll({where :{classeNameClass : instructor_class}})
+      return Section.findAll({where :{classeNameClass : instructor_class}})
     })
     .then(sections =>{
         res.status(200).send(sections);
