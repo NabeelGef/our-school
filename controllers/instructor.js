@@ -50,7 +50,7 @@ exports.login = (req,res,next ) =>{
         res.status(200).json({
            token: token,
            ins_id: loadedUser.id,
-           type : loadedUser.type,
+           role : loadedUser.role,
            username : loadedUser.username,
            firstName : loadedUser.first_name,
            lastName : loadedUser.last_name,
@@ -170,7 +170,6 @@ exports.getStudent = async(req,res,next) =>{
 
   exports.see_sections = (req,res,next) =>{
     id = req.userId;
-  console.log(`ID = ${id}`)
     Instructor.findByPk(id)
     .then(instructor =>{
       if(!instructor)
@@ -192,19 +191,20 @@ exports.getStudent = async(req,res,next) =>{
         next(err);
       });
 };
-exports.see_students = async (req,res,next) =>{
-
-  let section_id = req.params.sectionID;
-  Student.findAll({where : {sectionId :section_id}})
-  .then(student =>{
-    res.status(200).send(student);
-  })
-.catch(err => {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-    next(err);
-  });
+exports.see_students = (req,res,next) =>{
+  section_id = req.params.sectionID;
+  console.log(`ID Section : ${section_id}`);
+      Student.findAll({where : {sectionId :section_id}})
+      .then(student =>{
+        res.status(200).send(student);
+      })
+    .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+  
 };
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
@@ -240,7 +240,7 @@ exports.add_marks =async (req,res,next) =>{
   }
 };
 exports.add_note = (req,res,next) =>{
-  const student_id = req.params.studentID;
+  const student_id = req.body.studentID;
   const message = req.body.message;
   const exp_date = req.body.exp_date;
   Student.findByPk(student_id)

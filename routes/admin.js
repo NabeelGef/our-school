@@ -87,7 +87,7 @@ router.delete('/student/:StudentID',adminController.deleteStudent);
 // router.get('/student/:StudentID',adminController.getStudent);
 
 //----------------------------------------------------------------------
-router.post('/add-announcement',adminController.addAnnouncement);
+router.post('/add-announcement',isAuth,adminController.addAnnouncement);
 
 router.get('/show-all-announcement',adminController.ShowAnnouncements);
 

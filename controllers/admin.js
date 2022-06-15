@@ -23,7 +23,7 @@ exports.getAddInstructor = (req,res,next) =>{
     last_name : last_name,
     username : username,
     password : password,
-    type : 0,
+    role : 1,
     classeNameClass : classe
   })
   .then(instructor =>{
@@ -106,7 +106,7 @@ exports.deleteInstructor = (req,res,next) =>{
 
 exports.ShowInstructors = (req,res,next) =>{
 
-Instructor.findAll({where : {type : 0}})
+Instructor.findAll({where : {role : 1}})
 .then(instructors =>{
   if(!instructors[0])
   {

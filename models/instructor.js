@@ -28,8 +28,8 @@ const Instructor = sequelize.define('instructor', {
         type : Sequelize.STRING,
         allowNull: false
         },
-    type:{
-        type: Sequelize.BOOLEAN,
+    role:{
+        type: Sequelize.INTEGER,
         allowNull: false
     }
 });

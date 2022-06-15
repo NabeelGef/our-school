@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {
   const authHeader = req.get('authorization');
   
   if (!authHeader) {
-    const error = new Error('Not authenticated.');
+    const error = new Error('Not authenticated1.');
     error.statusCode = 401;
     throw error;
   }
@@ -19,16 +19,16 @@ module.exports = (req, res, next) => {
     throw err;
   }
   if (!decodedToken) {
-    const error = new Error('Not authenticated.');
     error.statusCode = 401;
     throw error;
   }
   req.userId = decodedToken.userId;
+  
   Instructor.findByPk(req.userId)
   .then(instructor =>{
     if(!instructor || instructor.type != 1 || instructor.username != decodedToken.username)
     {
-      const error = new Error('Not authenticated.');
+      const error = new Error('Not authenticated2.');
       error.statusCode = 401;
       throw error;
     } 

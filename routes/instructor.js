@@ -11,7 +11,7 @@ router.get('/add-marks-class',isAuth,instructorController.addmark_see_class);
 router.get('/see_sections',isAuth,instructorController.see_sections);
 //router.get('/add-marks-students/:sectionID',isAuth,instructorController.addmark_see_students);
 
-router.get('/see_students/:sectionID',instructorController.see_students);
+router.get('/see_students',instructorController.see_students);
 router.get('/getStudent/:studentID',instructorController.getStudent);
 
 router.post('/add-marks',instructorController.add_marks);

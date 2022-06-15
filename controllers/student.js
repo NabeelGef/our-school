@@ -71,7 +71,6 @@ exports.login = (req,res,next ) =>{
       next(err);
     });
 };
-
 exports.show_public_notes = (req,res,next) =>{
   PublicNote.findAll().then((publicnotes)=>{
     res.status(200).send(publicnotes);
@@ -80,7 +79,7 @@ exports.show_public_notes = (req,res,next) =>{
   });
 }
 exports.show_private_notes = (req,res,next) =>{
-
+ var Sid = req.get(Sid);
   Student.findByPk(1)
   .then(student =>{
     return student.getNotes();
@@ -96,4 +95,26 @@ exports.show_private_notes = (req,res,next) =>{
     }
     next(err);
   });
+}
+exports.getRanking = function(finalResult , myResult){
+ var Bad = finalResult/2;
+ var limit = (finalResult-Bad)/3;
+ var Mod = (finalResult-Bad)%3;
+ var mid = Bad + limit;
+ if(Mod!=0){
+  mid++;
+ }
+ var Good = mid+limit;
+ if(Mod===2){
+  Good++
+ }
+ var excellent = finalResult;
+ if(myResult<Bad){
+  return -5;
+ }else if (myResult<mid) {
+  return 4;
+ }else if (myResult<Good){
+  return 6;
+ }
+ return 8; 
 }

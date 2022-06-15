@@ -10,5 +10,4 @@ const NotesIteam = sequelize.define('notesIteam', {
     primaryKey: true
   }
 });
-
 module.exports = NotesIteam;

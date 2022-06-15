@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 const Instructor = require('../models/instructor');
 
 module.exports = (req, res, next) => {
-  const authHeader = req.get('token');
+  const authHeader = req.get('Authorization');
   console.log(`Token : ${authHeader}`);
   
   if (!authHeader) {
-    const error = new Error('Not authenticated.');
+    const error = new Error('Not authenticated1.');
     error.statusCode = 401;
     throw error;
   }
@@ -20,16 +20,17 @@ module.exports = (req, res, next) => {
     throw err;
   }
   if (!decodedToken) {
-    const error = new Error('Not authenticated.');
+    const error = new Error('Not authenticated2.');
     error.statusCode = 401;
     throw error;
   }
   req.userId = decodedToken.userId;
+  console.log(`ID is :  ${req.userId}`);
   Instructor.findByPk(req.userId)
   .then(instructor =>{
-    if(!instructor || instructor.type != 0 || instructor.username != decodedToken.username)
+    if(!instructor || instructor.role != 1 || instructor.username != decodedToken.username)
     {
-      const error = new Error('Not authenticated.');
+      const error = new Error('Not authenticated3.');
       error.statusCode = 401;
       throw error;
     } 
