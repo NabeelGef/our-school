@@ -176,7 +176,8 @@ exports.getAddStudent = (req,res,next) =>{
           absence_number: 0,
           signInDate : signInDate,
           username : username,
-          password : password
+          password : password,
+          rank : 0
         })
   })
   .then(() =>{
@@ -285,7 +286,7 @@ exports.ShowStudents = async (req,res,next) =>{
   const students = await Student.findAll();
   if(!students)
   {
-    res.status(200).json({messag : 'thier are no studnets'});
+    res.status(400).json({messag : 'thier are no studnets'});
   }
   while(students[i])
   {
@@ -298,7 +299,8 @@ exports.ShowStudents = async (req,res,next) =>{
         BirthDate : students[i].BirthDate,
         classeNameClass : section_row.classeNameClass,
         section :  section_row.name_sec,
-        password : students[i].password
+        password : students[i].password,
+        rank : students[i].rank
         
       }   
       students_array.push(element);

@@ -11,8 +11,10 @@ const Note = require('./models/note');
 const Section = require('./models/section');
 const Student = require('./models/student');
 const Week_program = require('./models/week_program');
-const PublicNote = require('./models/public-note');
-const NotesIteam = require('./models/notes-iteam');
+const Mark = require('./models/mark.js');
+const SectionNote = require('./models/section-note');
+const NoteIteam = require('./models/note-iteam');
+
 const app = express();
 
 
@@ -21,8 +23,6 @@ const instructorRoutes = require("./routes/instructor");
 const studentRoutes = require("./routes/students");
 
 app.use(bodyParser.json()); // application/json
-
-
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -47,14 +47,11 @@ app.use((error, req, res, next) => {
 
 
 
+Student.belongsToMany(SectionNote , {through : NoteIteam});
 
 
-
-
-PublicNote.belongsToMany(Student, { through: NotesIteam });
-Student.belongsToMany(PublicNote, { through: NotesIteam });
-
-
+Student.hasMany(Mark);
+Mark.belongsTo(Student);
 
 Student.hasOne(Limpidityie);
 Limpidityie.belongsTo(Student);

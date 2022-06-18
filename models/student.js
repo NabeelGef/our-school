@@ -48,7 +48,10 @@ const Student = sequelize.define('student', {
         },
     absence_number :{
         type : Sequelize.INTEGER
-        },            
+        },    
+        rank : {
+          type:Sequelize.INTEGER
+        }        
 });
 
 

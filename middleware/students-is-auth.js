@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const Student = require('../models/student');
 
 module.exports = (req, res, next) => {
-  const authHeader = req.get('authorization');
+  const authHeader = req.get('Authorization');
   
   if (!authHeader) {
     const error = new Error('Not authenticated.');

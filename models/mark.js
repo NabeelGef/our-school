@@ -3,19 +3,22 @@ const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
 
-const Limpidityies = sequelize.define('limpidityies', {
+const Mark = sequelize.define('mark', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
       },
-    limpidityies: {
-        type: Sequelize.BLOB,
-        allowNull: false
-      }
+      message: {
+        type: Sequelize.STRING,
+        require : true,
+        allowNull: false,
+      },
+    exp_date: {
+        type: Sequelize.DATEONLY
+    }
 });
 
 
-
-module.exports = Limpidityies;
+module.exports = Mark;

@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const PublicNote = require('../models/public-note');
 const Section = require('../models/section');
 const Student = require('../models/student');
+const SectionNote = require('../models/section-note');
+
 
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
@@ -117,4 +119,38 @@ exports.getRanking = function(finalResult , myResult){
   return 6;
  }
  return 8; 
+}
+exports.show_sections_notes = (req,res,next) =>{
+  const student_id = req.userId;
+  let notes_array = [ ];
+  let i = 0 ;
+  console.log(`ID Student : ${student_id}`);
+  Student.findByPk(student_id)
+  .then(student =>{
+    return student.getSectionnotes();
+  })
+  .then(notes =>{
+
+       if(!notes){
+        res.status(404).json({messag : 'Not Found any notes!!'});
+       }
+while(notes[i]){
+
+element = {
+  id:notes[i].id,
+  title : notes[i].title,
+  message : notes[i].message,
+  exp_date : notes[i].exp_date   
+}
+notes_array.push(element);
+i++;
+}
+    res.status(200).send(notes_array);
+  })
+  .catch(err => {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  })
 }

@@ -3,28 +3,28 @@ const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
 
-const Notes = sequelize.define('notes', {
+const SectionNote = sequelize.define('sectionnote', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
       },
+      title : {
+        type: Sequelize.STRING,
+        require : true,        
+      },
       message: {
         type: Sequelize.STRING,
-        allowNull: false,
-      },
-    type: {
-        type: Sequelize.BOOLEAN,
+        require : true,
         allowNull: false,
       },
     exp_date: {
-        type: Sequelize.DATE,
-        allowNull: false
+        type: Sequelize.DATEONLY
     }
 
 });
 
 
 
-module.exports = Notes;
+module.exports = SectionNote;

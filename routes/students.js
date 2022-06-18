@@ -9,5 +9,6 @@ const router = express.Router();
 router.post('/login',studentController.login);
 router.get('/show-public-note',studentController.show_public_notes);
 router.get('/show-private-note',studentController.show_private_notes);
+router.get('/show_section_note',isAuth,studentController.show_sections_notes);
 
 module.exports = router;

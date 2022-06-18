@@ -3,7 +3,11 @@ const jwt = require('jsonwebtoken');
 const Instructor = require('../models/instructor');
 const Section = require('../models/section');
 const Student = require('../models/student');
+const StudentController = require('../controllers/student');
 const Note = require('../models/note');
+const SectionNote = require('../models/section-note');
+const NoteIteam = require('../models/note-iteam');
+
 
 
 exports.login = (req,res,next ) =>{
@@ -66,82 +70,6 @@ exports.login = (req,res,next ) =>{
     });
 };
 
-exports.addmark_see_class = (req,res,next) =>{
-    id = req.userId;
-    Instructor.findByPk(id)
-    .then(instructor =>{
-      if(!instructor)
-      {
-        const error = new Error('A instructor with this username could not be found.');
-        error.statusCode = 401;
-        throw error;
-      }
-        const instructor_class = instructor.classeNameClass;
-        return Section.findAll({where :{classeNameClass : instructor_class}})
-    })
-    .then(sections =>{
-        res.status(200).json({
-            message: 'Fetched sections successfully.',
-            sections: sections
-          });
-    })
-    .catch(err => {
-        if (!err.statusCode) {
-          err.statusCode = 500;
-        }
-        next(err);
-      });
-  };
-
-
-  exports.addmark_see_students = (req,res,next) =>{
-
-      let section_id = req.params.sectionID;
-      Student.findAll({where : {sectionId :section_id}})
-      .then(student =>{
-        res.status(200).json({
-            message: 'student sections successfully.',
-            student: student
-          });
-      })
-    .catch(err => {
-        if (!err.statusCode) {
-          err.statusCode = 500;
-        }
-        next(err);
-      });
-  };
-
-
-  exports.addmark_see_students2 =(req,res,next) =>{
-    const subject = 1;
-    const fullmark = 2;
-  }
-
-
-  exports.add_note = (req,res,next) =>{
-    const student_id = req.params.studentID;
-    const message = req.body.message;
-    const exp_date = req.body.exp_date;
-    Student.findByPk(student_id)
-    .then(student =>{
-      student.createNote({
-        message : message,
-        exp_date : exp_date
-      })
-    })
-    .then(() =>{
-      res.status(200).json({
-        message : 'note has been sent'
-      })
-    })
-    .catch(err => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-};
 exports.getStudent = async(req,res,next) =>{
   const id = req.params.studentID;
   let student_sneding;
@@ -192,7 +120,7 @@ exports.getStudent = async(req,res,next) =>{
       });
 };
 exports.see_students = (req,res,next) =>{
-  section_id = req.params.sectionID;
+  const section_id = req.params.sectionID;
   console.log(`ID Section : ${section_id}`);
       Student.findAll({where : {sectionId :section_id}})
       .then(student =>{
@@ -206,6 +134,105 @@ exports.see_students = (req,res,next) =>{
       });
   
 };
+exports.add_class_note = async(req,res,next) =>{
+  const sections = req.body.sections;
+  const title = req.body.title;
+  const exp_date = req.body.exp_date;
+  const message = req.body.message;
+  var students,student;
+  var qq;
+  var SectionNotes;
+  var i =0,j=0,f=0;
+  while(sections[i])
+  {
+    SectionNotes = await SectionNote.create({ message : message, title : title,  exp_date : exp_date})
+    console.log("================="+SectionNotes+"=====================")
+    if(!SectionNotes)
+    { 
+      const error = new Error('thier is something wrong.');
+      error.statusCode = 404;
+      throw error;
+     }
+    students =  await Student.findAll({where : { sectionId : sections[i]}});
+    if(!students)
+    {
+      const error = new Error('Could not find this students.');
+      error.statusCode = 404;
+      throw error;
+    }
+    j = 0;
+    while(students[j])
+    {
+      student = students[j];
+      qq =await student.addSectionnote(SectionNotes);
+      j++;
+    }
+    i++;
+  }
+  res.status(200).json({
+    message: 'note has been sent'
+  })
+
+};
+
+exports.add_section_note = (req,res,next) =>{
+  const setionID = req.params.sectionID;
+  const title = req.body.title;
+  const exp_date = req.body.exp_date;
+  const message = req.body.message;
+  var student;
+  var temp_SectionNote;
+  SectionNote.create({
+    message : message,
+    title : title,
+    exp_date : exp_date
+  })
+  .then(SectionNotes =>{
+    console.log(SectionNotes)
+
+
+    if(!SectionNotes)
+    {
+      const error = new Error('thier is something wrong.');
+      error.statusCode = 404;
+      throw error;
+    }
+    temp_SectionNote = SectionNotes;
+    return Student.findAll({where : { sectionId : setionID}});
+  })
+  .then(students =>{
+    if(!students)
+    {
+      const error = new Error('Could not find this students.');
+      error.statusCode = 404;
+      throw error;
+    }
+    var i = 0;
+    while(students[i])
+    {
+      student = students[i];
+      console.log("=========")
+      console.log(temp_SectionNote)
+      console.log("=========")
+
+      student.addSectionnote(temp_SectionNote);
+      i++;
+    }
+  })
+  .then(() =>{    
+    res.status(200).json({
+      message: 'note has been sent'
+    })
+  })
+  .catch(err =>{
+    if(!err.statusCode)
+    {
+      err.status = 500;
+    }
+    next(err);
+  });
+}
+
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
@@ -221,6 +248,26 @@ exports.add_marks =async (req,res,next) =>{
     while(students_array[i])
     {
       student_row = await Student.findByPk(students_array[i].id)
+      result = StudentController.getRanking(out_of,students_array[i].mark);
+  oldrank = await Student.findOne({
+    where:{
+      id:students_array[i].id
+    }
+  });
+    result2 = oldrank.rank+result;
+    Student.update({
+      rank : result2
+    },{
+      where : {id : students_array[i].id}
+    }
+    );
+  
+      
+      
+      
+      if(!student_row){
+        res.status(400).send('Student is not found!!');
+      }
       message = "your son got a "+students_array[i].mark+" out of "+out_of+" in "+subject;
       student_row.createMark({
         message : message
@@ -233,10 +280,10 @@ exports.add_marks =async (req,res,next) =>{
     })
   }
   catch (error) {
-    if (!err.statusCode) {
-      err.statusCode = 500;
+    if (!error.statusCode) {
+      error.statusCode = 500;
     }
-    next(err);
+    next(error);
   }
 };
 exports.add_note = (req,res,next) =>{
