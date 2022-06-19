@@ -110,7 +110,6 @@ exports.getRanking = function(finalResult , myResult){
  if(Mod===2){
   Good++
  }
- var excellent = finalResult;
  if(myResult<Bad){
   return -5;
  }else if (myResult<mid) {
