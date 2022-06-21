@@ -83,6 +83,7 @@ sequelize
   //.sync({ force: true })
   .sync()
   .then(result => {
+    console.log("yamen");
    app.listen(3000);
   })
   .catch(err => {
