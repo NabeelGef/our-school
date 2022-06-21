@@ -236,7 +236,7 @@ exports.add_section_note = (req,res,next) =>{
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
-  const out_of = req.body.out_of;
+  const out_of = req.body.totalMark;
   let message;
   let i =0;
   let student_row;
