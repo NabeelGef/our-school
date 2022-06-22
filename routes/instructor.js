@@ -18,6 +18,7 @@ router.get('/getStudent/:studentID',instructorController.getStudent);
 router.post('/add_class_note',instructorController.add_class_note);
  router.post('/add_section_note/:sectionID',instructorController.add_section_note);
 
+router.post('/add_week_program',instructorController.add_week_program);
 router.post('/add-marks',instructorController.add_marks);
 router.post('/add-note/:studentID',instructorController.add_note);
 router.post('/chech_attendance',instructorController.check_attendance);

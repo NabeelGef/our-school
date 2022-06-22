@@ -7,6 +7,8 @@ const StudentController = require('../controllers/student');
 const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
+const program = require('../models/program');
+const Week_program = require('../models/week_program');
 
 
 
@@ -232,7 +234,47 @@ exports.add_section_note = (req,res,next) =>{
     next(err);
   });
 }
-
+exports.add_week_program =async (req,res,next)=>{
+  const sectionId = req.body.sec_id;
+  const arrayProgram = req.body.program;
+  let week_program;
+  if(!sectionId){
+    res.status(400).send('SectionId is required!!');
+  }
+  if(!arrayProgram){
+    res.status(400).send('Program is required!!');
+  }
+  week_program =await Week_program.findOne(//هون كيف لازم يتعبّى تيبل البرنامج بآيديهات الشعب تلقائي لما ضيف شعبة ؟؟
+    {
+      where:{
+         sectionId:sectionId
+        }
+      }
+      ).catch(err=>{
+        res.status(500).send(err);
+      });
+      console.log(week_program);
+      let i = 0;
+    while(arrayProgram[i]){
+      week_program.createProgram({//ماعميزبط تخزينها
+        day:arrayProgram[i].day,
+        first:arrayProgram[i].first,
+        second:arrayProgram[i].second,
+        third:arrayProgram[i].third,
+        forth:arrayProgram[i].forth,
+        fifth:arrayProgram[i].fifth,
+        sixth:arrayProgram[i].sixth,
+        seventh:arrayProgram[i].seventh
+      }).catch(err=>{
+        res.status(500).send(err);  //زبطلي قصص الايرورات كمان 
+      });
+      week_program.save();
+      i++;
+    }
+    res.status(200).json({
+      message : 'it has been done'
+    })
+}
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
@@ -260,11 +302,7 @@ exports.add_marks =async (req,res,next) =>{
     },{
       where : {id : students_array[i].id}
     }
-    );
-  
-      
-      
-      
+    );  
       if(!student_row){
         res.status(400).send('Student is not found!!');
       }

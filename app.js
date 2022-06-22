@@ -14,6 +14,7 @@ const Week_program = require('./models/week_program');
 const Mark = require('./models/mark.js');
 const SectionNote = require('./models/section-note');
 const NoteIteam = require('./models/note-iteam');
+const program = require('./models/program');
 
 const app = express();
 
@@ -64,6 +65,9 @@ Section.hasOne(Week_program);
 Week_program.belongsTo(Section);
 
 
+Week_program.hasOne(program);
+program.belongsTo(Week_program);
+
 Student.hasMany(Note);
 Note.belongsTo(Student);
 
@@ -83,7 +87,7 @@ sequelize
   //.sync({ force: true })
   .sync()
   .then(result => {
-    console.log("nabeel");
+  
    app.listen(3000);
   })
   .catch(err => {

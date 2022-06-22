@@ -9,10 +9,6 @@ const Week_program = sequelize.define('week_program', {
         allowNull: false,
         primaryKey: true
       },  
-    weekProgram: {
-        type: Sequelize.BLOB,
-        allowNull: false
-      }
 });
 
 
