@@ -75,7 +75,6 @@ exports.login = (req,res,next ) =>{
 };
 exports.show_public_notes = (req,res,next) =>{
   const student_id = req.userId;
-  let notes_array = [ ];
   let i = 0 ;  
 PublicNote.findAll().then((publicnotes)=>{
   Student.findByPk(student_id)

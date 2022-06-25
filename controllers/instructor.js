@@ -121,19 +121,41 @@ exports.getStudent = async(req,res,next) =>{
         next(err);
       });
 };
-exports.see_students = (req,res,next) =>{
+exports.see_students =async (req,res,next) =>{
   const section_id = req.params.sectionID;
+  let section_row;
+  let students_array = [];
   console.log(`ID Section : ${section_id}`);
-      Student.findAll({where : {sectionId :section_id}})
-      .then(student =>{
-        res.status(200).send(student);
-      })
-    .catch(err => {
-        if (!err.statusCode) {
-          err.statusCode = 500;
+      let student = await Student.findAll({where : {sectionId :section_id}});
+      let i = 0;
+      while(student[i]){
+        section_row = await Section.findByPk(student[i].sectionId);
+        element = {
+          Sid:student[i].id,
+          first_name:student[i].first_name,
+          last_name:student[i].last_name,
+          username : student[i].username,
+          father_name:student[i].father_name,
+          BirthDate : student[i].BirthDate,
+          name_class : section_row.classeNameClass,
+          name_sec : section_row.name_sec,
+          password: student[i].password,
+          rank : student[i].rank,
+          age : student[i].age,
+          attend_number : student[i].attend_number,
+          absence_number : student[i].absence_number
         }
-        next(err);
-      });
+        students_array.push(element);
+          i++;
+      } 
+        res.status(200).send(students_array);
+    
+    // .catch(err => {
+    //     if (!err.statusCode) {
+    //       err.statusCode = 500;
+    //     }
+    //     next(err);
+      // });
   
 };
 exports.add_class_note = async(req,res,next) =>{
@@ -327,12 +349,11 @@ exports.add_marks =async (req,res,next) =>{
 exports.add_note = (req,res,next) =>{
   const student_id = req.body.studentID;
   const message = req.body.message;
-  const exp_date = req.body.exp_date;
+  //const exp_date = req.body.exp_date;
   Student.findByPk(student_id)
   .then(student =>{
-    student.createNote({
+    student.addNote({
       message : message,
-      exp_date : exp_date
     })
   })
   .then(() =>{
