@@ -8,7 +8,6 @@ const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
 const program = require('../models/program');
-const Week_program = require('../models/week_program');
 
 
 
@@ -265,19 +264,17 @@ exports.add_week_program =async (req,res,next)=>{
     error.statusCode = 422;
     throw error;
   }
-  week_program =await Week_program.findOne(//هون كيف لازم يتعبّى تيبل البرنامج بآيديهات الشعب تلقائي لما ضيف شعبة ؟؟
-    {
+  week_program =await Section.findOne({
       where:{
-         sectionId:sectionId
+         id:sectionId
         }
       }
       ).catch(err=>{
         res.status(500).send(err);
       });
-      console.log(week_program);
       let i = 0;
     while(arrayProgram[i]){
-      week_program.createProgram({//ماعميزبط تخزينها
+      week_program.createProgram({
         day:arrayProgram[i].day,
         first:arrayProgram[i].first,
         second:arrayProgram[i].second,
@@ -287,7 +284,8 @@ exports.add_week_program =async (req,res,next)=>{
         sixth:arrayProgram[i].sixth,
         seventh:arrayProgram[i].seventh
       }).catch(err=>{
-        res.status(500).send(err);  //زبطلي قصص الايرورات كمان 
+        res.status(500).send(err); 
+        return;
       });
       week_program.save();
       i++;
