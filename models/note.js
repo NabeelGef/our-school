@@ -15,7 +15,7 @@ const Note = sequelize.define('note', {
         require : true,
         allowNull: false,
       },
-    exp_date: {
+    start_date: {
         type: Sequelize.DATEONLY
     }
 

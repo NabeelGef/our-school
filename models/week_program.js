@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
 
-const Week_program = sequelize.define('week_program', {
+const Weekprogram = sequelize.define('weekprogram', {
     id: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -13,4 +13,4 @@ const Week_program = sequelize.define('week_program', {
 
 
 
-module.exports = Week_program;
+module.exports = Weekprogram;

@@ -260,11 +260,10 @@ exports.add_week_program =async (req,res,next)=>{
   const sectionId = req.body.sec_id;
   const arrayProgram = req.body.program;
   let week_program;
-  if(!sectionId){
-    res.status(400).send('SectionId is required!!');
-  }
-  if(!arrayProgram){
-    res.status(400).send('Program is required!!');
+  if(!sectionId||!arrayProgram){
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
   }
   week_program =await Week_program.findOne(//هون كيف لازم يتعبّى تيبل البرنامج بآيديهات الشعب تلقائي لما ضيف شعبة ؟؟
     {
@@ -347,16 +346,16 @@ exports.add_marks =async (req,res,next) =>{
   }
 };
 exports.add_note = (req,res,next) =>{
-  const student_id = req.body.studentID;
+  const student_id = req.params.studentID;
   const message = req.body.message;
-  //const exp_date = req.body.exp_date;
   Student.findByPk(student_id)
   .then(student =>{
-    student.addNote({
+    return student.createNote({
       message : message,
+      start_date : Date.now()
     })
   })
-  .then(() =>{
+  .then(err =>{
     res.status(200).json({
       message : 'note has been sent'
     })

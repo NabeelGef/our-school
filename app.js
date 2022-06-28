@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 
 app.use('/admin',adminRoutes);
 app.use('/instructor',instructorRoutes);
+app.use(express.urlencoded({extended: true}));
 app.use(studentRoutes);
 
 
@@ -65,7 +66,7 @@ Section.hasOne(Week_program);
 Week_program.belongsTo(Section);
 
 
-Week_program.hasOne(program);
+Week_program.hasMany(program);
 program.belongsTo(Week_program);
 
 Student.hasMany(Note);
