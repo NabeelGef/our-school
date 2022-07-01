@@ -51,6 +51,9 @@ const Student = sequelize.define('student', {
         },    
         rank : {
           type:Sequelize.INTEGER
+        },
+        tokenMessage : {
+          type : Sequelize.STRING
         }        
 });
 

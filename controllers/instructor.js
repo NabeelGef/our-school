@@ -8,7 +8,9 @@ const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
 const program = require('../models/program');
-
+const FCM = require('fcm-node');
+var server_key = require('../notification-fdc24-73b5f8816914.json');
+const fcm = new FCM(server_key);
 
 
 exports.login = (req,res,next ) =>{
@@ -142,7 +144,8 @@ exports.see_students =async (req,res,next) =>{
           rank : student[i].rank,
           age : student[i].age,
           attend_number : student[i].attend_number,
-          absence_number : student[i].absence_number
+          absence_number : student[i].absence_number,
+          tokenMessage : student[i].tokenMessage
         }
         students_array.push(element);
           i++;
@@ -346,14 +349,31 @@ exports.add_marks =async (req,res,next) =>{
 exports.add_note = (req,res,next) =>{
   const student_id = req.params.studentID;
   const message = req.body.message;
+  let toToken;
   Student.findByPk(student_id)
   .then(student =>{
+    toToken = student.tokenMessage;
     return student.createNote({
       message : message,
       start_date : Date.now()
     })
   })
-  .then(err =>{
+  .then(() =>{
+    // send notification
+    var message = {
+      to:toToken,
+      notification:{
+        title:'Note Private',
+        body:'There is a note privat for you please check it'
+      }
+    };
+    fcm.send(message,function(err,response){
+      if(err){
+        console.log("response : " + err);
+      }else{
+        console.log("Successfully sent with response : " , response);
+      }
+    });
     res.status(200).json({
       message : 'note has been sent'
     })

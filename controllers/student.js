@@ -10,8 +10,9 @@ const SectionNote = require('../models/section-note');
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
     const password = req.body.password;
+    const tokenMessage = req.body.tokenMessage;
     let loadedStudenr;
-
+    let token ;
     Student.findAll({where :{username : username}})
     .then(students =>{
         if(!students)
@@ -34,15 +35,14 @@ exports.login = (req,res,next ) =>{
         }
         return false;
 
-    })
-    .then (async isEqual =>{
+    }).then (async isEqual =>{
         if(!isEqual)
         {
             const error = new Error('Wrong password!');
             error.statusCode = 401;
             throw error;
         }
-        const token = jwt.sign(
+        token = jwt.sign(
             {
               username: loadedStudenr.username,
               userId: loadedStudenr.id
@@ -50,28 +50,33 @@ exports.login = (req,res,next ) =>{
             'somesupersecretsecret',
             { expiresIn: '1h' }
           );
+          Student.update({
+            tokenMessage : tokenMessage
+          },{
+            where :{} 
+          });
           section_row = await Section.findByPk(loadedStudenr.sectionId);
-        res.status(200).json({id : loadedStudenr.id, 
-                first_name: loadedStudenr.first_name,
-                last_name : loadedStudenr.last_name,
-                age : loadedStudenr.age,
-                father_name : loadedStudenr.father_name,
-                username : loadedStudenr.username,
-                password : loadedStudenr.password ,
-                signInDate : loadedStudenr.signInDate ,
-                BirthDate : loadedStudenr.BirthDate,
-                attend_number : loadedStudenr.attend_number,
-                absence_number : loadedStudenr.absence_number,
-                class : section_row.classeNameClass,
-                name_sec : section_row.name_sec,
-                token : token    });       
-    })
-     .catch(err => {
+          res.status(200).json({id : loadedStudenr.id, 
+            first_name: loadedStudenr.first_name,
+            last_name : loadedStudenr.last_name,
+            age : loadedStudenr.age,
+            father_name : loadedStudenr.father_name,
+            username : loadedStudenr.username,
+            password : loadedStudenr.password ,
+            signInDate : loadedStudenr.signInDate ,
+            BirthDate : loadedStudenr.BirthDate,
+            attend_number : loadedStudenr.attend_number,
+            absence_number : loadedStudenr.absence_number,
+            class : section_row.classeNameClass,
+            name_sec : section_row.name_sec,
+            token : token,
+            tokenMessage:tokenMessage   });
+         }).catch(err => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
       next(err);
-    });
+    });       
 };
 exports.show_public_notes = (req,res,next) =>{
   const student_id = req.userId;
