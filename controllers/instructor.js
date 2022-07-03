@@ -11,7 +11,7 @@ const program = require('../models/program');
 const FCM = require('fcm-node');
 var server_key = require('../notification-fdc24-73b5f8816914.json');
 const fcm = new FCM(server_key);
-
+const { Op } = require("sequelize");
 
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
@@ -296,6 +296,47 @@ exports.add_week_program =async (req,res,next)=>{
     res.status(200).json({
       message : 'it has been done'
     })
+}
+exports.show_week_program = async (req,res,next)=>{
+  const sec_id = req.body.sec_id;
+  if(!sec_id){
+    //error handling
+    return
+  }
+array_weeks = await program.findAll({where : {
+  sectionId : sec_id
+}});
+res.send(array_weeks);
+}
+exports.edit_week_program =async (req,res,next)=>{
+  const sec_id = req.body.sec_id;
+  const arrayProgram = req.body.program;
+  let i = 0;
+  while(arrayProgram[i]){
+   program.update({
+      first:arrayProgram[i].first,
+      second:arrayProgram[i].second,
+      third:arrayProgram[i].third,
+      forth:arrayProgram[i].forth,
+      fifth:arrayProgram[i].fifth,
+      sixth:arrayProgram[i].sixth,
+      seventh:arrayProgram[i].seventh
+    },{
+       where : {
+         [Op.and]:[
+           {
+            day:arrayProgram[i].day,
+            sectionId : sec_id
+           }
+         ] 
+       }
+    })
+     .catch(err =>{
+      next(err);
+     });
+     i++;
+  }
+  res.send(arrayProgram);
 }
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
