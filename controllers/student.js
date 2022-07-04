@@ -113,8 +113,8 @@ res.status(200).send(publicnotes);
 
 }
 exports.show_private_notes = (req,res,next) =>{
- var Sid = req.get(Sid);
-  Student.findByPk(1)
+ var Sid = req.userId;
+  Student.findByPk(Sid)
   .then(student =>{
     return student.getNotes();
   })

@@ -13,7 +13,7 @@ router.get('/see_sections',isAuth,instructorController.see_sections);
 
 router.get('/see_students/:sectionID',instructorController.see_students);
 router.get('/getStudent/:studentID',instructorController.getStudent);
-router.get('/show_week_program',instructorController.show_week_program);
+router.get('/show_week_program/:section',instructorController.show_week_program);
 
 router.post('/add_class_note',instructorController.add_class_note);
  router.post('/add_section_note/:sectionID',instructorController.add_section_note);
