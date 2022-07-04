@@ -5,7 +5,8 @@ const PublicNote = require('../models/public-note');
 const Section = require('../models/section');
 const Student = require('../models/student');
 const SectionNote = require('../models/section-note');
-
+const Instructor = require('../models/instructor');
+const Complaint = require('../models/complaint');
 
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
@@ -150,6 +151,32 @@ exports.getRanking = function(finalResult , myResult){
   return 6;
  }
  return 8; 
+}
+exports.send_Complaint = (req,res,next)=>{
+  const Sid = req.userId;
+  const message = req.body.message;
+  Student.findByPk(Sid).
+  then(async student =>{
+    let section_id = student.sectionId;
+    let classname = await Section.findOne({where : {
+      id:section_id
+    }});
+    let Ins_id = await Instructor.findOne({where : {
+      classeNameClass:classname.classeNameClass
+    }});
+    Complaint.create({
+      Sid : Sid,
+      Ins_id : Ins_id.id,
+      message : message,
+      start_date : Date.now()
+    }).catch(err =>{
+      throw err;
+    });
+  }
+  ).catch(err =>{
+    throw err;
+  })
+  res.status(200).send("it has been done ")
 }
 // exports.show_sections_notes = (req,res,next) =>{
 //   const student_id = req.userId;

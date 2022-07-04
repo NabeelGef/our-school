@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/login',studentController.login);
 router.get('/show-public-note',isAuth,studentController.show_public_notes);
 router.get('/show-private-note',isAuth,studentController.show_private_notes);
+router.post('/send_complaint',isAuth,studentController.send_Complaint);
 //router.get('/show_section_note',isAuth,studentController.show_sections_notes);
 
 module.exports = router;

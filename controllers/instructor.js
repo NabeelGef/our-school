@@ -8,6 +8,7 @@ const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
 const program = require('../models/program');
+const Complaint = require('../models/complaint');
 const FCM = require('fcm-node');
 var server_key = require('../notification-fdc24-73b5f8816914.json');
 const fcm = new FCM(server_key);
@@ -459,5 +460,15 @@ exports.check_attendance = async(req,res,next) =>{
     next(err);
   }
 };
+exports.getComplaint = (req,res,next)=>{
+  const id = req.userId;
+  Complaint.findAll({where : {
+    Ins_id : id
+  }}).then(alldata =>{
+    res.send(alldata)
+  }).catch(err=>{
+    throw err;
+  });
+}
 
 
