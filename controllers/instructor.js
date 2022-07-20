@@ -9,16 +9,14 @@ const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
 const program = require('../models/program');
 const Complaint = require('../models/complaint');
-const FCM = require('fcm-node');
-var server_key = require('../notification-fdc24-73b5f8816914.json');
-const fcm = new FCM(server_key);
+const FCM = require('../util/notification');
+const fcm = FCM.fcm;
 const { Op } = require("sequelize");
-
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
     const password = req.body.password;
+    const tokenMessage = req.body.tokenMessage;
     let loadedUser;
-
     Instructor.findAll({where :{username : username}})
     .then(instructors =>{
         if(!instructors)
@@ -55,6 +53,11 @@ exports.login = (req,res,next ) =>{
           'somesupersecretsecret',
           { expiresIn: '1h' }
         );
+        Instructor.update({
+          tokenMessage : tokenMessage
+        },{
+          where :{} 
+        });
         res.status(200).json({
            token: token,
            ins_id: loadedUser.id,
@@ -63,7 +66,8 @@ exports.login = (req,res,next ) =>{
            firstName : loadedUser.first_name,
            lastName : loadedUser.last_name,
            password : loadedUser.password,
-           name_class : loadedUser.classeNameClass
+           name_class : loadedUser.classeNameClass,
+           tokenMessage : tokenMessage
           });
     })
      .catch(err => {
@@ -73,7 +77,6 @@ exports.login = (req,res,next ) =>{
       next(err);
     });
 };
-
 exports.getStudent = async(req,res,next) =>{
   const id = req.params.studentID;
   let student_sneding;
@@ -93,14 +96,11 @@ exports.getStudent = async(req,res,next) =>{
 
 
 };
-
-
 exports.logout = (req,res,next) =>{
     var delete_cookie = function(name)
      { document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;'; };
-  }
-
-  exports.see_sections = (req,res,next) =>{
+};
+exports.see_sections = (req,res,next) =>{
     id = req.userId;
     Instructor.findByPk(id)
     .then(instructor =>{
@@ -201,7 +201,6 @@ exports.add_class_note = async(req,res,next) =>{
   })
 
 };
-
 exports.add_section_note = (req,res,next) =>{
   const setionID = req.params.sectionID;
   const title = req.body.title;
@@ -216,8 +215,6 @@ exports.add_section_note = (req,res,next) =>{
   })
   .then(SectionNotes =>{
     console.log(SectionNotes)
-
-
     if(!SectionNotes)
     {
       const error = new Error('thier is something wrong.');
@@ -258,7 +255,7 @@ exports.add_section_note = (req,res,next) =>{
     }
     next(err);
   });
-}
+};
 exports.add_week_program =async (req,res,next)=>{
   const sectionId = req.body.sec_id;
   const arrayProgram = req.body.program;
@@ -297,9 +294,9 @@ exports.add_week_program =async (req,res,next)=>{
     res.status(200).json({
       message : 'it has been done'
     })
-}
+};
 exports.show_week_program = async (req,res,next)=>{
-  const sec_id = req.body.sec_id;
+  const sec_id = req.params.sec_id;
   if(!sec_id){
     //error handling
     return
@@ -308,7 +305,7 @@ array_weeks = await program.findAll({where : {
   sectionId : sec_id
 }});
 res.send(array_weeks);
-}
+};
 exports.edit_week_program =async (req,res,next)=>{
   const sec_id = req.body.sec_id;
   const arrayProgram = req.body.program;
@@ -338,7 +335,7 @@ exports.edit_week_program =async (req,res,next)=>{
      i++;
   }
   res.send(arrayProgram);
-}
+};
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
@@ -372,7 +369,8 @@ exports.add_marks =async (req,res,next) =>{
       }
       message = "your son got a "+students_array[i].mark+" out of "+out_of+" in "+subject;
       student_row.createMark({
-        message : message
+        message : message,
+        start_date : Date.now()
       })
       student_row.save();
       i++;
@@ -460,15 +458,27 @@ exports.check_attendance = async(req,res,next) =>{
     next(err);
   }
 };
-exports.getComplaint = (req,res,next)=>{
+exports.getComplaint =async (req,res,next)=>{
   const id = req.userId;
-  Complaint.findAll({where : {
+  let alldata = await Complaint.findAll({where : {
     Ins_id : id
-  }}).then(alldata =>{
-    res.send(alldata)
-  }).catch(err=>{
-    throw err;
-  });
-}
+  }});
+     let i = 0 ;
+     let DATAArray = [];
+     while(alldata[i]){
+      let student_info = await Student.findOne({where:{id : alldata[i].Sid}})
+      let name = student_info.first_name + student_info.last_name;
+        let data = {
+          message : alldata[i].message,
+          start_date: alldata[i].start_date,
+          username:name
+        }
+        
+        DATAArray.push(data);
+       i++;
+     }
+     res.send(DATAArray);     
+    
+};
 
 

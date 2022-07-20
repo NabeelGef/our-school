@@ -15,7 +15,7 @@ const Mark = sequelize.define('mark', {
         require : true,
         allowNull: false,
       },
-    exp_date: {
+    start_date: {
         type: Sequelize.DATEONLY
     }
 });

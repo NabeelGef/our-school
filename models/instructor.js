@@ -31,6 +31,9 @@ const Instructor = sequelize.define('instructor', {
     role:{
         type: Sequelize.INTEGER,
         allowNull: false
+    },
+    tokenMessage:{
+      type : Sequelize.STRING
     }
 });
 
