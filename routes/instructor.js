@@ -48,10 +48,12 @@ router.get('/see_sections',isAuth,instructorController.see_sections);
 
 router.get('/see_students/:sectionID',instructorController.see_students);
 router.get('/getStudent/:studentID',instructorController.getStudent);
-
+router.get('/show_week_program/:section',instructorController.show_week_program);
+router.get('/getComplaint',isAuth,instructorController.getComplaint);
 
 router.post('/add_class_note',instructorController.add_class_note);
 router.post('/add_section_note/:sectionID',instructorController.add_section_note);
+<<<<<<< HEAD
 
 router.post('/add_week_program/:sectionID',instructorController.add_week_program);
 
@@ -59,6 +61,12 @@ router.post('/add_limpidityie/:studentID',upload.single('limpidityie'),instructo
 router.get('/see_limpidityie/:studentID',instructorController.see_limpidityie)
 
 
+=======
+
+router.post('/add_week_program',instructorController.add_week_program);
+router.post('/edit_week_program',instructorController.edit_week_program);
+
+>>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
 router.post('/add-marks',instructorController.add_marks);
 router.post('/add-note/:studentID',instructorController.add_note);
 router.post('/check_attendance',instructorController.check_attendance);

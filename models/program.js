@@ -5,9 +5,11 @@ const sequelize = require('../util/database');
 
 const program = sequelize.define('program', {
     id: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
+        autoIncrement : true,
         allowNull: false,
         primaryKey: true
+      
       },
       day:{
         type:Sequelize.STRING,

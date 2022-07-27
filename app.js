@@ -10,7 +10,6 @@ const Limpidityie = require('./models/limpidityie');
 const Note = require('./models/note');
 const Section = require('./models/section');
 const Student = require('./models/student');
-const Week_program = require('./models/week_program');
 const Mark = require('./models/mark.js');
 const SectionNote = require('./models/section-note');
 const NoteIteam = require('./models/note-iteam');
@@ -62,12 +61,8 @@ Classe.hasOne(Instructor);
 Instructor.belongsTo(Classe);
 
 
-Section.hasOne(Week_program);
-Week_program.belongsTo(Section);
-
-
-Week_program.hasMany(program);
-program.belongsTo(Week_program);
+Section.hasMany(program);
+program.belongsTo(Section);
 
 Student.hasMany(Note);
 Note.belongsTo(Student);
@@ -88,7 +83,6 @@ sequelize
   // .sync({ force: true })
   .sync()
   .then(result => {
-  
    app.listen(3000);
   })
   .catch(err => {

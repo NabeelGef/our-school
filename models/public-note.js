@@ -21,7 +21,10 @@ const PublicNote = sequelize.define('publicNote', {
       },
     exp_date: {
         type: Sequelize.DATEONLY
-    }
+    },
+    start_date: {
+      type: Sequelize.DATEONLY
+  }
 
 });
 
