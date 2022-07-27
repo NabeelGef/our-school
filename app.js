@@ -14,7 +14,7 @@ const Week_program = require('./models/week_program');
 const Mark = require('./models/mark.js');
 const SectionNote = require('./models/section-note');
 const NoteIteam = require('./models/note-iteam');
-const program = require('./models/program');
+const program = require('./models/Program');
 
 const app = express();
 
@@ -85,7 +85,7 @@ Section.belongsTo(Classe);
 
 
 sequelize
-  //.sync({ force: true })
+  // .sync({ force: true })
   .sync()
   .then(result => {
   

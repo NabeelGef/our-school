@@ -11,8 +11,9 @@ const Limpidityie = sequelize.define('limpidityie', {
         primaryKey: true
       },
     limpidityies: {
-        type: Sequelize.BLOB,
-        allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false,
+        require : true
       }
 });
 

@@ -132,27 +132,21 @@ exports.getAddStudent = (req,res,next) =>{
     error.statusCode = 422;
     throw error;
   }
-
   var section_id ;
   const first_name = req.body.first_name;
   const last_name = req.body.last_name;
   const father_name = req.body.father_name ;
   const classe =  req.body.classeNameClass;
   const section = req.body.section;
-  const BirthDate = req.body.BirthDate;
+  const BirthDate = req.body.BirthDate.split('T')[0];
   const username = last_name;
-
-  console.log(father_name+"----------"+classe)
   var min = 10000;
   var max = 99999;
   var password1 = Math.floor(Math.random() * (max - min + 1)) + min;
   var password = password1.toString();
-
-  const age = Math.abs(new Date().getFullYear()- BirthDate.split('/')[2]);
+  const age = Math.abs(new Date().getFullYear()- BirthDate.split('-')[0]);
   if(age < 0)
   {
-  console.log("------------------------------------")
-
     const error = new Error('this birtherday cant be right');
     error.statusCode = 422;
     throw error;
@@ -163,8 +157,13 @@ exports.getAddStudent = (req,res,next) =>{
   console.log(`signInDate : ${signInDate}`);
   Section.findOne({where : {classeNameClass : classe ,name_sec : section }})
   .then(sectionclass =>{
+    if(!sectionclass)
+    {
+      const error = new Error('the class or section you enterd is incorrect');
+      error.statusCode = 422;
+      throw error;
+    }
     section_id = sectionclass.id;
-    console.log(`sectionId : ${section_id}`);
    return Student.create({
           first_name : first_name,
           last_name : last_name,
@@ -194,7 +193,6 @@ exports.getAddStudent = (req,res,next) =>{
 }
 
 exports.updateStudent = (req,res,next) =>{
-  console.log("--------------------------")
   const studentID = req.params.studentID;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -208,9 +206,8 @@ exports.updateStudent = (req,res,next) =>{
   const father_name = req.body.father_name ;
   const classe =  req.body.classeNameClass;
   const section = req.body.section;
-  const BirthDate = req.body.BirthDate;
+  const BirthDate = req.body.BirthDate.split('T')[0];
   const password = req.body.password;
-  console.log(first_name+""+last_name+""+father_name+""+classe+""+section+""+password+"//////"+BirthDate)
   Section.findOne({where : {classeNameClass : classe ,name_sec : section }})
   .then(sectionclass =>{
     section_id = sectionclass.id;
@@ -230,7 +227,7 @@ exports.updateStudent = (req,res,next) =>{
     student.sectionId = section_id;
     if(BirthDate != student.BirthDate)
     {
-      const age = Math.abs(new Date().getFullYear()- BirthDate.split('/')[2]); 
+      const age = Math.abs(new Date().getFullYear()- BirthDate.split('-')[0]);
       student.BirthDate = BirthDate;
       student.age = age;
     }

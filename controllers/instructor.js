@@ -7,8 +7,10 @@ const StudentController = require('../controllers/student');
 const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
-const program = require('../models/program');
+const program = require('../models/Program');
 const Week_program = require('../models/week_program');
+const Limpidityie = require('../models/limpidityie')
+const { validationResult } = require('express-validator');
 
 
 
@@ -125,7 +127,6 @@ exports.see_students =async (req,res,next) =>{
   const section_id = req.params.sectionID;
   let section_row;
   let students_array = [];
-  console.log(`ID Section : ${section_id}`);
       let student = await Student.findAll({where : {sectionId :section_id}});
       let i = 0;
       while(student[i]){
@@ -149,13 +150,7 @@ exports.see_students =async (req,res,next) =>{
           i++;
       } 
         res.status(200).send(students_array);
-    
-    // .catch(err => {
-    //     if (!err.statusCode) {
-    //       err.statusCode = 500;
-    //     }
-    //     next(err);
-      // });
+  
   
 };
 exports.add_class_note = async(req,res,next) =>{
@@ -170,7 +165,6 @@ exports.add_class_note = async(req,res,next) =>{
   while(sections[i])
   {
     SectionNotes = await SectionNote.create({ message : message, title : title,  exp_date : exp_date})
-    console.log("================="+SectionNotes+"=====================")
     if(!SectionNotes)
     { 
       const error = new Error('thier is something wrong.');
@@ -257,25 +251,20 @@ exports.add_section_note = (req,res,next) =>{
   });
 }
 exports.add_week_program =async (req,res,next)=>{
-  const sectionId = req.body.sec_id;
+  const sectionId = req.params.sectionID;
   const arrayProgram = req.body.program;
+  console.log("=============")
+  console.log(arrayProgram);
   let week_program;
   if(!sectionId||!arrayProgram){
     const error = new Error('Validation failed, entered data is incorrect.');
     error.statusCode = 422;
     throw error;
   }
-  week_program =await Week_program.findOne(//هون كيف لازم يتعبّى تيبل البرنامج بآيديهات الشعب تلقائي لما ضيف شعبة ؟؟
-    {
-      where:{
-         sectionId:sectionId
-        }
-      }
-      ).catch(err=>{
-        res.status(500).send(err);
-      });
-      console.log(week_program);
-      let i = 0;
+  //وقت منستخدم اسكروننس منحط تراي وكاتش
+  try {
+    week_program =await Week_program.findOne({where:{sectionId:sectionId}})
+    let i = 0;
     while(arrayProgram[i]){
       week_program.createProgram({//ماعميزبط تخزينها
         day:arrayProgram[i].day,
@@ -286,15 +275,20 @@ exports.add_week_program =async (req,res,next)=>{
         fifth:arrayProgram[i].fifth,
         sixth:arrayProgram[i].sixth,
         seventh:arrayProgram[i].seventh
-      }).catch(err=>{
-        res.status(500).send(err);  //زبطلي قصص الايرورات كمان 
-      });
+      })
       week_program.save();
       i++;
     }
     res.status(200).json({
       message : 'it has been done'
-    })
+    })  
+  }
+  catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }    
 }
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
@@ -350,12 +344,12 @@ exports.add_note = (req,res,next) =>{
   const message = req.body.message;
   Student.findByPk(student_id)
   .then(student =>{
-    return student.createNote({
+    student.createNote({
       message : message,
       start_date : Date.now()
     })
   })
-  .then(err =>{
+  .then(() =>{
     res.status(200).json({
       message : 'note has been sent'
     })
@@ -367,6 +361,33 @@ exports.add_note = (req,res,next) =>{
     next(err);
   });
 };
+
+// exports.see_student_in_class = async(req,res,next) =>{
+//   const section_id = req.params.sectionID;
+//   Student.findAll({where : {sectionId :section_id}})
+//   .then(student =>{
+//     if(!student)
+//     {
+//       const error = new Error('this student is not exist.');
+//       error.statusCode = 404;
+//       throw error;
+//     }
+//     res.status(200).send(student)
+//   })
+//   .catch(error)
+//   {
+//     if (!err.statusCode) {
+//       err.statusCode = 500;
+//     }
+//     next(err);
+//   }
+// };
+
+
+
+
+
+
 exports.check_attendance = async(req,res,next) =>{
   const students_array = req.body.students_array;
   let i =0;
@@ -374,26 +395,30 @@ exports.check_attendance = async(req,res,next) =>{
   try {
     if(!students_array)
     {
-      res.status(400).json({messag : 'thier is something wrong'});
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
     }
     while(students_array[i])
     {
+      
       student_row = await Student.findByPk(students_array[i].id)
-      if(students_array[i].attend == true)
-      {
-        student_row.attend_number ++;
-      }
-      else
+      if(students_array[i].absence == true)
       {
         student_row.absence_number ++;
       }
+      else
+      {
+        student_row.attend_number ++;
+      }
+      student_row.save();
       i++;
     }
     res.status(200).json({
       message : 'it has been done'
     })
   }
-  catch (error) {
+  catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
     }
@@ -402,3 +427,47 @@ exports.check_attendance = async(req,res,next) =>{
 };
 
 
+
+exports.add_limpidityie = (req,res,next) =>{
+  const studentID = req.params.studentID;
+  let temp_student;
+  Student.findByPk(studentID)
+  .then(student =>{
+    if(!student)
+    {
+      const error = new Error('Could not find this student.');
+      error.statusCode = 404;
+      throw error;
+    }
+    temp_student = student;
+    if(req.file)
+    {
+      if(req.file.filename){
+        destination= req.file.destination.split('./public');
+        return limpidityie = destination[1]+'/'+req.file.filename;
+        }
+    }
+  })
+  .then(limpidityie =>{
+    temp_student.createLimpidityie({
+      limpidityies:limpidityie
+    })
+  })
+  .then(() =>{
+    res.status(201).json({message : "the Limpidityie has been created"})
+  })
+  .catch(err => {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  });
+};
+
+exports.see_limpidityie = (req,res,next) =>{
+  const studentID = req.params.studentID;
+  Limpidityie.findOne({where : {studentId :studentID}})
+  .then(limpidityie =>{
+    res.status(200).send(limpidityie);
+  })
+}
