@@ -7,21 +7,16 @@ const StudentController = require('../controllers/student');
 const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
 const NoteIteam = require('../models/note-iteam');
-<<<<<<< HEAD
-const program = require('../models/Program');
-const Week_program = require('../models/week_program');
 const Limpidityie = require('../models/limpidityie')
 const { validationResult } = require('express-validator');
 
 
 
-=======
 const program = require('../models/program');
 const Complaint = require('../models/complaint');
 const FCM = require('../util/notification');
 const fcm = FCM.fcm;
 const { Op } = require("sequelize");
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
     const password = req.body.password;
@@ -269,13 +264,9 @@ exports.add_week_program =async (req,res,next)=>{
     error.statusCode = 422;
     throw error;
   }
-<<<<<<< HEAD
   //وقت منستخدم اسكروننس منحط تراي وكاتش
   try {
-    week_program =await Week_program.findOne({where:{sectionId:sectionId}})
-    let i = 0;
-=======
-  week_program =await Section.findOne({
+   week_program =await Section.findOne({
       where:{
          id:sectionId
         }
@@ -284,7 +275,6 @@ exports.add_week_program =async (req,res,next)=>{
         res.status(500).send(err);
       });
       let i = 0;
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
     while(arrayProgram[i]){
       week_program.createProgram({
         day:arrayProgram[i].day,
@@ -295,20 +285,12 @@ exports.add_week_program =async (req,res,next)=>{
         fifth:arrayProgram[i].fifth,
         sixth:arrayProgram[i].sixth,
         seventh:arrayProgram[i].seventh
-<<<<<<< HEAD
       })
-=======
-      }).catch(err=>{
-        res.status(500).send(err); 
-        return;
-      });
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
       week_program.save();
       i++;
     }
     res.status(200).json({
       message : 'it has been done'
-<<<<<<< HEAD
     })  
   }
   catch (err) {
@@ -318,9 +300,6 @@ exports.add_week_program =async (req,res,next)=>{
     next(err);
   }    
 }
-=======
-    })
-};
 exports.show_week_program = async (req,res,next)=>{
   const sec_id = req.params.sec_id;
   if(!sec_id){
@@ -362,7 +341,6 @@ exports.edit_week_program =async (req,res,next)=>{
   }
   res.send(arrayProgram);
 };
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
@@ -419,19 +397,13 @@ exports.add_note = (req,res,next) =>{
   let toToken;
   Student.findByPk(student_id)
   .then(student =>{
-<<<<<<< HEAD
-    student.createNote({
-=======
     toToken = student.tokenMessage;
     return student.createNote({
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
       message : message,
       start_date : Date.now()
     })
   })
   .then(() =>{
-<<<<<<< HEAD
-=======
     // send notification
     var message = {
       to:toToken,
@@ -447,7 +419,6 @@ exports.add_note = (req,res,next) =>{
         console.log("Successfully sent with response : " , response);
       }
     });
->>>>>>> cf23909e7cc58dd930e7fa3e12e163bcac926d1a
     res.status(200).json({
       message : 'note has been sent'
     })
