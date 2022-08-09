@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 
 const sequelize = require('./util/database');
 const Classe = require('./models/classe');
+const Abscese = require('./models/abscese')
 const Instructor = require('./models/instructor');
 const Limpidityie = require('./models/limpidityie');
 const Note = require('./models/note');
@@ -13,7 +14,7 @@ const Student = require('./models/student');
 const Mark = require('./models/mark.js');
 const SectionNote = require('./models/section-note');
 const NoteIteam = require('./models/note-iteam');
-const program = require('./models/Program');
+const program = require('./models/program');
 
 const app = express();
 
@@ -21,8 +22,10 @@ const app = express();
 const adminRoutes = require('./routes/admin');
 const instructorRoutes = require("./routes/instructor");
 const studentRoutes = require("./routes/students");
+const Complaint = require('./models/complaint');
 
 app.use(bodyParser.json()); // application/json
+app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -37,6 +40,7 @@ app.use((req, res, next) => {
 app.use('/admin',adminRoutes);
 app.use('/instructor',instructorRoutes);
 app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(studentRoutes);
 
 
@@ -47,12 +51,19 @@ app.use((error, req, res, next) => {
 });
 
 
-
 Student.belongsToMany(SectionNote , {through : NoteIteam});
 
+Student.hasMany(Complaint);
+Complaint.belongsTo(Student);
+
+Instructor.hasMany(Complaint);
+Complaint.belongsTo(Instructor);
 
 Student.hasMany(Mark);
 Mark.belongsTo(Student);
+
+Student.hasMany(Abscese);
+Abscese.belongsTo(Student);
 
 Student.hasOne(Limpidityie);
 Limpidityie.belongsTo(Student);
@@ -69,6 +80,7 @@ Note.belongsTo(Student);
 
 Section.hasMany(Student);
 Student.belongsTo(Section);
+ 
 
 
 
@@ -80,7 +92,7 @@ Section.belongsTo(Classe);
 
 
 sequelize
-  // .sync({ force: true })
+  //.sync({   force: true })
   .sync()
   .then(result => {
    app.listen(3000);

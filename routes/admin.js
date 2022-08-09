@@ -22,6 +22,8 @@ router.post(
     .isLength({ min: 3 }),
     body('password')
     .isLength({ min: 5 }),
+    body('classeNameClass')
+    .notEmpty()
 ],adminController.getAddInstructor);
 
 
@@ -41,11 +43,12 @@ router.put(
     .isLength({ min: 3 }),
     body('password')
     .isLength({ min: 5 }),
+    body('classeNameClass')
+    .exists()
+    .notEmpty()
 ],adminController.updateInstructor);
 
 router.delete('/instructor/:InstructorID',adminController.deleteInstructor);
-
-// router.get('/instructor/:InstructorID',adminController.getInstructor);
 
 //----------------------------------------------------------------------
 
@@ -61,6 +64,12 @@ router.post('/add-student',
     body('father_name')
     .trim()
     .isLength({ min: 3 }),
+    body('BirthDate')
+    .notEmpty(),
+    body('classeNameClass')
+    .notEmpty(),
+    body('section')
+    .notEmpty()
 ],adminController.getAddStudent);
 
 
@@ -80,22 +89,44 @@ router.put('/student/:studentID',
     .isLength({ min: 3 }),
     body('password')
     .isLength({ min: 5 }),
+    body('BirthDate')
+    .notEmpty(),
+    body('classeNameClass')
+    .notEmpty(),
+    body('section')
 ],adminController.updateStudent);
 
 router.delete('/student/:StudentID',adminController.deleteStudent);
 
-// router.get('/student/:StudentID',adminController.getStudent);
 
 //----------------------------------------------------------------------
-router.post('/add-announcement',adminController.addAnnouncement);
+router.post('/add-announcement',
+[
+    body('title')
+    .isLength({ min: 5 })
+    .notEmpty(),
+    body('message')
+    .isLength({ min: 10 })
+    .notEmpty(),
+      body('exp_date')
+      .notEmpty()
+],adminController.addAnnouncement);
 
 router.get('/show-all-announcement',adminController.ShowAnnouncements);
 
-router.put('/announcement/:AnnouncementID',adminController.updateAnnouncement)
+router.put('/announcement/:AnnouncementID',
+[
+    body('title')
+    .isLength({ min: 5 })
+    .notEmpty(),
+    body('message')
+    .isLength({ min: 10 })
+    .notEmpty(),
+      body('exp_date')
+      .notEmpty()
+],adminController.updateAnnouncement)
 
 router.delete('/announcement/:AnnouncementID',adminController.deleteAnnouncement);
-
-// router.get('/announcement/:AnnouncementID',adminController.getAnnouncement);
 
 
 module.exports = router;

@@ -22,7 +22,8 @@ const Instructor = sequelize.define('instructor', {
       },      
     username: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique : true
         },
     password :{
         type : Sequelize.STRING,

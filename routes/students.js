@@ -12,6 +12,9 @@ router.get('/show-private-note',isAuth,studentController.show_private_notes);
 router.get('/show_marks',isAuth,studentController.show_marks);
 router.post('/send_complaint',isAuth,studentController.send_Complaint);
 router.get('/show_week_program/:section',studentController.show_week_program);
+router.get('/showAbcenseNote',isAuth , studentController.getAbcenseNote);   
+router.get('/see_limpidityie',isAuth,studentController.see_limpidityie)
+
 //router.get('/show_section_note',isAuth,studentController.show_sections_notes);
 
 module.exports = router;

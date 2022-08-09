@@ -4,20 +4,26 @@ const Instructor = require('../models/instructor');
 const Section = require('../models/section');
 const Student = require('../models/student');
 const StudentController = require('../controllers/student');
-const Note = require('../models/note');
 const SectionNote = require('../models/section-note');
-const NoteIteam = require('../models/note-iteam');
-const Limpidityie = require('../models/limpidityie')
-const { validationResult } = require('express-validator');
-
-
-
 const program = require('../models/program');
 const Complaint = require('../models/complaint');
 const FCM = require('../util/notification');
 const fcm = FCM.fcm;
+const Abscese = require('../models/abscese');
 const { Op } = require("sequelize");
+const { validationResult } = require('express-validator/check');
+
+
+
+
+
 exports.login = (req,res,next ) =>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
+    }
     const username = req.body.username;
     const password = req.body.password;
     const tokenMessage = req.body.tokenMessage;
@@ -58,21 +64,18 @@ exports.login = (req,res,next ) =>{
           'somesupersecretsecret',
           { expiresIn: '1h' }
         );
-        Instructor.update({
-          tokenMessage : tokenMessage
-        },{
-          where :{} 
-        });
+
+        loadedUser.tokenMessage = tokenMessage;
+        loadedUser.save();
         res.status(200).json({
            token: token,
-           ins_id: loadedUser.id,
-           role : loadedUser.role,
+           tokenMessage : tokenMessage,
+           first_name : loadedUser.first_name,
+           last_name:loadedUser.last_name,
            username : loadedUser.username,
-           firstName : loadedUser.first_name,
-           lastName : loadedUser.last_name,
+           id:loadedUser.id,
            password : loadedUser.password,
-           name_class : loadedUser.classeNameClass,
-           tokenMessage : tokenMessage
+           name_class : loadedUser.classeNameClass
           });
     })
      .catch(err => {
@@ -82,29 +85,15 @@ exports.login = (req,res,next ) =>{
       next(err);
     });
 };
-exports.getStudent = async(req,res,next) =>{
-  const id = req.params.studentID;
-  let student_sneding;
-  const student = await Student.findByPk(id)
-  const section_row =  await Section.findByPk(students[i].sectionId);
-  student_sneding = {
-    id : student.id,
-    first_name : student.first_name,
-    last_name : student.last_name,
-    father_name : student.father_name,
-    BirthDate : student.BirthDate,
-    classeNameClass : section_row.classeNameClass,
-    section :  section_row.name_sec,
-    password : student.password
-  }
-  res.status(200).send(student_sneding);
 
 
-};
+
 exports.logout = (req,res,next) =>{
     var delete_cookie = function(name)
      { document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;'; };
 };
+
+
 exports.see_sections = (req,res,next) =>{
     id = req.userId;
     Instructor.findByPk(id)
@@ -128,7 +117,9 @@ exports.see_sections = (req,res,next) =>{
         next(err);
       });
 };
-exports.see_students =async (req,res,next) =>{
+
+
+exports.see_students =async (req,res,next) =>{  
   const section_id = req.params.sectionID;
   let section_row;
   let students_array = [];
@@ -159,6 +150,8 @@ exports.see_students =async (req,res,next) =>{
   
   
 };
+
+
 exports.add_class_note = async(req,res,next) =>{
   const sections = req.body.sections;
   const title = req.body.title;
@@ -198,6 +191,8 @@ exports.add_class_note = async(req,res,next) =>{
   })
 
 };
+
+
 exports.add_section_note = (req,res,next) =>{
   const setionID = req.params.sectionID;
   const title = req.body.title;
@@ -253,41 +248,37 @@ exports.add_section_note = (req,res,next) =>{
     next(err);
   });
 };
+
+
 exports.add_week_program =async (req,res,next)=>{
   const sectionId = req.params.sectionID;
   const arrayProgram = req.body.program;
-  console.log("=============")
-  console.log(arrayProgram);
-  let week_program;
-  if(!sectionId||!arrayProgram){
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
     const error = new Error('Validation failed, entered data is incorrect.');
     error.statusCode = 422;
     throw error;
   }
-  //وقت منستخدم اسكروننس منحط تراي وكاتش
-  try {
-   week_program =await Section.findOne({
-      where:{
-         id:sectionId
-        }
-      }
-      ).catch(err=>{
-        res.status(500).send(err);
-      });
+  let week_program;
+  try 
+  {
+    week_program =await Section.findOne({
+        where:{
+          id:sectionId
+          }})
       let i = 0;
-    while(arrayProgram[i]){
-      week_program.createProgram({
-        day:arrayProgram[i].day,
-        first:arrayProgram[i].first,
-        second:arrayProgram[i].second,
-        third:arrayProgram[i].third,
-        forth:arrayProgram[i].forth,
-        fifth:arrayProgram[i].fifth,
-        sixth:arrayProgram[i].sixth,
-        seventh:arrayProgram[i].seventh
-      })
-      week_program.save();
-      i++;
+      while(arrayProgram[i]){
+        week_program.createProgram({
+          day:arrayProgram[i].day,
+          first:arrayProgram[i].first,
+          second:arrayProgram[i].second,
+          third:arrayProgram[i].third,
+          forth:arrayProgram[i].forth,
+          fifth:arrayProgram[i].fifth,
+          sixth:arrayProgram[i].sixth,
+          seventh:arrayProgram[i].seventh
+        })
+        i++;
     }
     res.status(200).json({
       message : 'it has been done'
@@ -300,47 +291,77 @@ exports.add_week_program =async (req,res,next)=>{
     next(err);
   }    
 }
+
+
 exports.show_week_program = async (req,res,next)=>{
-  const sec_id = req.params.sec_id;
-  if(!sec_id){
-    //error handling
-    return
+  const sectionID = req.params.sectionID;
+  try
+  {
+    array_weeks = await program.findAll({where : {
+      sectionId : sectionID
+    }});
+    if(!array_weeks)
+    {
+      const error = new Error('Could not find this program.');
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).send(array_weeks);
   }
-array_weeks = await program.findAll({where : {
-  sectionId : sec_id
-}});
-res.send(array_weeks);
-};
-exports.edit_week_program =async (req,res,next)=>{
-  const sec_id = req.body.sec_id;
-  const arrayProgram = req.body.program;
-  let i = 0;
-  while(arrayProgram[i]){
-   program.update({
-      first:arrayProgram[i].first,
-      second:arrayProgram[i].second,
-      third:arrayProgram[i].third,
-      forth:arrayProgram[i].forth,
-      fifth:arrayProgram[i].fifth,
-      sixth:arrayProgram[i].sixth,
-      seventh:arrayProgram[i].seventh
-    },{
-       where : {
-         [Op.and]:[
-           {
-            day:arrayProgram[i].day,
-            sectionId : sec_id
-           }
-         ] 
-       }
-    })
-     .catch(err =>{
-      next(err);
-     });
-     i++;
+  catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }    
+}
+
+
+exports.update_week_program =async (req,res,next)=>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
   }
-  res.send(arrayProgram);
+  const sectionID = req.body.sectionID;
+
+  try
+  {
+    const arrayProgram = req.body.program;
+    let i = 0;
+    while(arrayProgram[i]){
+     program.update({
+        first:arrayProgram[i].first,
+        second:arrayProgram[i].second,
+        third:arrayProgram[i].third,
+        forth:arrayProgram[i].forth,
+        fifth:arrayProgram[i].fifth,
+        sixth:arrayProgram[i].sixth,
+        seventh:arrayProgram[i].seventh
+      },{
+         where : {
+           [Op.and]:[
+             {
+              day:arrayProgram[i].day,
+              sectionId : sectionID
+             }
+           ] 
+         }
+      })
+       i++;
+    }
+    res.send(arrayProgram);
+  }
+  catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
+
+
 exports.add_marks =async (req,res,next) =>{
   const students_array = req.body.students_array;
   const subject = req.body.subject;
@@ -391,6 +412,8 @@ exports.add_marks =async (req,res,next) =>{
     next(error);
   }
 };
+
+
 exports.add_note = (req,res,next) =>{
   const student_id = req.params.studentID;
   const message = req.body.message;
@@ -474,6 +497,13 @@ exports.check_attendance = async(req,res,next) =>{
       student_row = await Student.findByPk(students_array[i].id)
       if(students_array[i].absence == true)
       {
+        var today = new Date();
+        student_row.createAbscese({
+          message : "your son is absent from school today",
+          exp_date : today.getDay()+20,
+          start_date : Date.now()
+        })
+        student_row.rank-=2;
         student_row.absence_number ++;
       }
       else
@@ -495,30 +525,73 @@ exports.check_attendance = async(req,res,next) =>{
   }
 };
 exports.getComplaint =async (req,res,next)=>{
-  const id = req.userId;
+  const userId = req.userId;
+  try{
   let alldata = await Complaint.findAll({where : {
-    Ins_id : id
+    instructorId : userId
   }});
      let i = 0 ;
      let DATAArray = [];
      while(alldata[i]){
-      let student_info = await Student.findOne({where:{id : alldata[i].Sid}})
+      let student_info = await Student.findOne({where:{id : alldata[i].studentId}})
       let name = student_info.first_name + student_info.last_name;
         let data = {
           message : alldata[i].message,
           start_date: alldata[i].start_date,
           username:name
         }
-        
         DATAArray.push(data);
        i++;
      }
-     res.send(DATAArray);     
-    
+     res.send(DATAArray);
+    }catch(err){
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    }     
 };
 
-
-
+exports.addAbcenseNote = (req,res,next)=>{
+  const studentId = req.params.studentID;
+  const message = req.body.message;
+  let toToken;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
+  }
+  Student.findByPk(studentId)
+  .then(student =>{
+    toToken = student.tokenMessage;
+    student.createAbscese({
+      message:message,
+      exp_date : (Date.now()+20),
+      start_date : Date.now()
+    }).then((result)=>{
+      var message2 = {
+        to:toToken,
+        notification:{
+          title:'Absence warning',
+          body: 'There is a Absence Warning for you please check it'
+        }
+      };
+      fcm.send(message2,function(err,response){
+        if(err){
+          console.log("response : " + err);
+        }else{
+          console.log("Successfully sent with response : " , response);
+        }
+      });
+      res.status(201).send('Abcense note has been sent');
+  }).catch(err=>{
+     next(err);
+  })
+}).catch(err =>{
+  next(err)
+});
+};
 exports.add_limpidityie = (req,res,next) =>{
   const studentID = req.params.studentID;
   let temp_student;
@@ -535,7 +608,7 @@ exports.add_limpidityie = (req,res,next) =>{
     {
       if(req.file.filename){
         destination= req.file.destination.split('./public');
-        return limpidityie = destination[1]+'/'+req.file.filename;
+        return limpidityie = 'http://192.168.138.8:3000' + destination[1]+'/'+req.file.filename;
         }
     }
   })
@@ -555,10 +628,3 @@ exports.add_limpidityie = (req,res,next) =>{
   });
 };
 
-exports.see_limpidityie = (req,res,next) =>{
-  const studentID = req.params.studentID;
-  Limpidityie.findOne({where : {studentId :studentID}})
-  .then(limpidityie =>{
-    res.status(200).send(limpidityie);
-  })
-}

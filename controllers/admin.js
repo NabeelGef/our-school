@@ -3,8 +3,6 @@ const Section = require('../models/section');
 const Student = require('../models/student');
 const PublicNote = require('../models/public-note');
 const { validationResult } = require('express-validator/check');
-const bcrypt = require('bcryptjs');
-const note = require('../models/note');
 
 exports.getAddInstructor = (req,res,next) =>{
   const errors = validationResult(req);
@@ -67,7 +65,6 @@ exports.updateInstructor = (req,res,next) => {
     instructor.classeNameClass = classe;
     return instructor.save()
   }).then(result =>{
-    console.log(`result : ${result}`);
     res.status(200).send(result)
   })
   .catch(err => {
@@ -132,7 +129,6 @@ exports.getAddStudent = (req,res,next) =>{
     error.statusCode = 422;
     throw error;
   }
-  var section_id ;
   const first_name = req.body.first_name;
   const last_name = req.body.last_name;
   const father_name = req.body.father_name ;
@@ -154,7 +150,6 @@ exports.getAddStudent = (req,res,next) =>{
 
   var today = new Date();
   var signInDate = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-  console.log(`signInDate : ${signInDate}`);
   Section.findOne({where : {classeNameClass : classe ,name_sec : section }})
   .then(sectionclass =>{
     if(!sectionclass)
@@ -163,12 +158,11 @@ exports.getAddStudent = (req,res,next) =>{
       error.statusCode = 422;
       throw error;
     }
-    section_id = sectionclass.id;
    return Student.create({
           first_name : first_name,
           last_name : last_name,
           father_name : father_name,
-          sectionId : section_id,
+          sectionId : sectionclass.id,
           BirthDate : BirthDate,
           age: age,
           attend_number: 0,
@@ -245,20 +239,17 @@ exports.updateStudent = (req,res,next) =>{
 };
 
 exports.deleteStudent = (req,res,next) =>{
-  console.log("+++++++++++++++++++")
 
   const StudentID = req.params.StudentID;
   Student.findByPk(StudentID)
   .then(student =>{
     if(!student)
     {
-      console.log("------------------")
 
       const error = new Error('Could not find this student.');
       error.statusCode = 404;
       throw error;
     }
-    console.log("qqqqqqqqqqqqqq")
     student.destroy(); 
   })
   .then(() =>{
@@ -318,13 +309,21 @@ exports.ShowStudents = async (req,res,next) =>{
 //--------------------------------------------------------------------------
 
 exports.addAnnouncement = (req,res,next) =>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
+  }
   const title = req.body.title;
   const message = req.body.message;
   const exp_date = req.body.exp_date;
+  const start_date = Date.now();
   PublicNote.create({
     message : message,
     exp_date : exp_date,
-    title : title
+    title : title,
+    start_date : start_date
   })
   .then(() =>{
     res.status(201).json({
@@ -343,10 +342,16 @@ exports.addAnnouncement = (req,res,next) =>{
 
 
 exports.updateAnnouncement = (req,res,next) =>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error('Validation failed, entered data is incorrect.');
+    error.statusCode = 422;
+    throw error;
+  }
   const announcementID = req.params.AnnouncementID;
   const announcement = req.body.message;
   const exp_date = req.body.exp_date;
-  const title = req.body.title
+  const title = req.body.title;
   PublicNote.findByPk(announcementID)
   .then(publicnote =>{
     if (!publicnote) {
@@ -371,7 +376,6 @@ exports.updateAnnouncement = (req,res,next) =>{
 }
 
 exports.deleteAnnouncement = (req,res,next) =>{
-  
   const announcementID = req.params.AnnouncementID;
   PublicNote.findByPk(announcementID)
   .then(publicnote =>{
@@ -397,7 +401,27 @@ exports.deleteAnnouncement = (req,res,next) =>{
 
 
 exports.ShowAnnouncements = (req,res,next) =>{
+
+  let today1 = new Date();
+  today1.setHours(0, 0, 0, 0);
   PublicNote.findAll()
+  .then(publicnotes =>{
+    if(!publicnotes[0])
+    {
+      res.status(200).json({message : 'thier is no note'})
+    }
+    let i = 0;
+    while(publicnotes[i])
+    {
+      var midnightUTCDate = new Date( publicnotes[i].exp_date + 'T00:00:00Z');
+      if(midnightUTCDate > today1)
+      {
+        publicnotes[i].destroy();
+      }
+      i++;
+    }
+    return  PublicNote.findAll();
+  })
   .then(publicnotes =>{
     if(!publicnotes[0])
     {
@@ -414,25 +438,6 @@ exports.ShowAnnouncements = (req,res,next) =>{
   });
 }
 
-
-exports.getAnnouncement = (req,res,next) =>{
-  const announcementID = req.params.AnnouncementID;
-  PublicNote.findByPk(announcementID)
-  .then(publicnote =>{
-    if(!publicnote)
-    {
-      res.status(200).json({messag : 'thier arent any publicnote'});
-    }
-    res.status(200).json({publicnote : publicnote});
-  })
-  .catch(err =>{
-    if(!err.statusCode)
-    {
-      err.statusCode = 500;
-    }
-    next(err);
-  });
-}
 
 
 

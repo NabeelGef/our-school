@@ -1,4 +1,3 @@
- const { send } = require('express/lib/response');
 const jwt = require('jsonwebtoken');
 const PublicNote = require('../models/public-note');
 const Section = require('../models/section');
@@ -6,16 +5,19 @@ const Student = require('../models/student');
 const SectionNote = require('../models/section-note');
 const Instructor = require('../models/instructor');
 const Complaint = require('../models/complaint');
+const Abcense = require('../models/abscese');
 const program = require('../models/program');
 const FCM = require('../util/notification');
+const Limpidityie = require('../models/limpidityie')
 const fcm = FCM.fcm;
 const e = require('express');
 
 exports.send_Complaint = (req,res,next)=>{
-  const Sid = req.userId;
+  const studentId = req.userId;
   const message = req.body.message;
-  let toToken , ins_Id;
-  Student.findByPk(Sid).
+  let toToken , instructorId;
+  try{
+  Student.findByPk(studentId).
   then(async student =>{
     let section_id = student.sectionId;
     let classname = await Section.findOne({where : {
@@ -25,8 +27,7 @@ exports.send_Complaint = (req,res,next)=>{
       classeNameClass:classname.classeNameClass
     }}).then(Ins_Info =>{
       toToken = Ins_Info.tokenMessage;
-      ins_Id = Ins_Info.id;
-      console.log(`ID INS : ${ins_Id}`);
+      instructorId = Ins_Info.id;
       var message2 = {
         to:toToken,
         notification:{
@@ -40,23 +41,45 @@ exports.send_Complaint = (req,res,next)=>{
         }else{
           console.log("Successfully sent with response : " , response);
         }
-        Complaint.create({
-          Sid : Sid,
-          Ins_id : ins_Id,
-          message : message,
+        student.createComplaint({
+          instructorId : instructorId,
+          message :message,
           start_date : Date.now()
-        }).catch(err =>{
-          throw err;
-        });
+        })
       });
     })
-     }).catch(err =>{
-      throw err;
-    })
+     })
+    }catch(err){
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+    }
+
+
+
       // send notification
   res.status(200).send("it has been done ")
 }
-
+exports.getAbcenseNote =async (req,res,next)=>{
+ try{
+  let i = 0 , DATAArray = []; 
+  const abcense = await Abcense.findAll(
+  {where :{studentId :req.userId}})
+  while(abcense[i]){
+    let data = {
+      message : abcense[i].message,
+      start_date : abcense[i].start_date,
+      exp_date : abcense[i].exp_date  
+    }
+    DATAArray.push(data);
+    i++;
+  }   
+res.status(200).send(DATAArray);
+}catch(err){
+  next(err);
+}
+}
 exports.login = (req,res,next ) =>{
     const username = req.body.username;
     const password = req.body.password;
@@ -266,3 +289,10 @@ res.send(array_weeks);
 //     next(err);
 //   })
 //}
+exports.see_limpidityie = (req,res,next) =>{
+  const studentID = req.userId
+  Limpidityie.findOne({where : {studentId :studentID}})
+  .then(limpidityie =>{
+    res.status(200).send(limpidityie);
+  })
+}

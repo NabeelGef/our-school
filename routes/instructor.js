@@ -2,6 +2,8 @@ const express = require('express');
 
 const instructorController = require('../controllers/instructor');
 const isAuth = require('../middleware/instructor-is-auth');
+const { body } = require('express-validator/check');
+
 var uuid = require('uuid');
 const path = require('path');
 
@@ -34,29 +36,66 @@ var storage = multer.diskStorage({
 
 const router = express.Router();
 
-// GET /feed/posts
-router.post('/login',instructorController.login);
-//router.get('/add-marks-class',isAuth,instructorController.addmark_see_class);
-router.get('/see_sections',isAuth,instructorController.see_sections);
-//router.get('/add-marks-students/:sectionID',isAuth,instructorController.addmark_see_students);
 
+///////////////////////////////////////////////////////////////////
+router.post('/login',
+[
+    body('username')
+    .trim()
+    .isLength({ min: 3 }),
+    body('password')
+    .trim()
+    .isLength({ min: 5 }),
+    body('tokenMessage')
+    .notEmpty()
+],instructorController.login);
+///////////////////////////////////////////////////////////////////
+router.get('/see_sections',isAuth,instructorController.see_sections);
 router.get('/see_students/:sectionID',instructorController.see_students);
-router.get('/getStudent/:studentID',instructorController.getStudent);
-router.get('/show_week_program/:section',instructorController.show_week_program);
+
+///////////////////////////////////////////////////////////////////
+router.post('/add_week_program/:sectionID',
+[
+  body('program.*.day')
+  .notEmpty(),
+  body('program.*.first')
+  .notEmpty(),
+  body('program.*.second')
+  .notEmpty(),
+  body('program.*.third')
+  .notEmpty(),
+  body('program.*.forth')
+  .notEmpty(),
+  body('program.*.fifth')
+  .notEmpty(),
+  body('program.*.sixth')
+  .notEmpty()
+],instructorController.add_week_program);
+router.get('/show_week_program/:sectionID',instructorController.show_week_program);
+router.post('/edit_week_program/:sectionID',instructorController.update_week_program);
+
+///////////////////////////////////////////////////////////////////
 router.get('/getComplaint',isAuth,instructorController.getComplaint);
 
+///////////////////////////////////////////////////////////////////
 router.post('/add_class_note',instructorController.add_class_note);
 router.post('/add_section_note/:sectionID',instructorController.add_section_note);
-
-router.post('/add_week_program/:sectionID',instructorController.add_week_program);
-
-router.post('/add_limpidityie/:studentID',upload.single('limpidityie'),instructorController.add_limpidityie)
-router.get('/see_limpidityie/:studentID',instructorController.see_limpidityie)
-
-router.post('/edit_week_program',instructorController.edit_week_program);
-
-router.post('/add-marks',instructorController.add_marks);
 router.post('/add-note/:studentID',instructorController.add_note);
+router.post('/add-marks',instructorController.add_marks);
 router.post('/check_attendance',instructorController.check_attendance);
+
+///////////////////////////////////////////////////////////////////
+router.post('/add_limpidityie/:studentID',upload.single('limpidityie'),instructorController.add_limpidityie)
+
+////////////////////////////////////////////////////////////////////
+router.post('/addAbsenceNote/:studentID',[
+  body('message')
+    .trim()
+    .isLength({ min: 5 }),
+    
+],instructorController.addAbcenseNote);
+
+
+
 
 module.exports = router;

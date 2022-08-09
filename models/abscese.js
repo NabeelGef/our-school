@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
 
-const Complaint = sequelize.define('complaint', {
+const Abscese = sequelize.define('abscese', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -16,10 +16,13 @@ const Complaint = sequelize.define('complaint', {
         allowNull: false,
       },
       start_date: {
-          type: Sequelize.DATEONLY
-      }
+        type: Sequelize.DATEONLY
+    },
+      exp_date: {
+        type: Sequelize.DATEONLY
+    },
 });
 
 
 
-module.exports = Complaint;
+module.exports = Abscese;

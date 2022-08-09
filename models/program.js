@@ -16,22 +16,28 @@ const program = sequelize.define('program', {
         allowNull:false
       },
       first:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       second:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       third:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       forth:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       fifth:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       sixth:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING,
+        allowNull:false
       },
       seventh:{
         type:Sequelize.STRING
